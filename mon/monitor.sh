@@ -44,8 +44,15 @@ os_cluster_pending_tasks_number/${LVLCLUSTER}/es_cluster_pending_tasks_number///
 os_cluster_inflight_fetch_number/${LVLCLUSTER}/es_cluster_inflight_fetch_number///i
 os_cluster_task_max_waiting_time_seconds/${LVLCLUSTER}/es_cluster_task_max_waiting_time_seconds///i
 os_jvm_mem_heap_used_percent/${LVLNODE}/es_jvm_mem_heap_used_percent///i
+os_indices_doc_number/${LVLNODE}/es_indices_doc_number///i
+os_indices_doc_deleted_number/${LVLNODE}/es_indices_doc_deleted_number///i
+os_jvm_threads_number/${LVLNODE}/es_jvm_threads_number///i
+os_jvm_threads_peak_number/${LVLNODE}/es_jvm_threads_peak_number///i
 METRIC_SELECTORS
 )
+
+KEY_CLUSTER_HEALTH="cluster_health"
+KEY_NODE_HEALTH="node_health"
 
 # store the raw info retrived from exporter
 RAWINFO=
@@ -67,13 +74,14 @@ main() {
         echo "{}"
         return $EXIT_CODE_OK
     fi
-    
+    local hstr=$(getHealthMetric "$1")
     echo "{"
     if [ "$1" = "cluster" ]; then
         getClusterMetrics
     else
         getNodeMetrics
     fi
+    echo "$hstr"
     echo "}"
 }
 
@@ -92,10 +100,60 @@ getRowInfoFromExporter() {
     RAWINFO=$(echo "$tmpstr" | awk 'NR>1{print p}{p=$0}')
 }
 
-# calculate health metrics
+getHealthMetric() {
+    local res
+    if [ "$1" = "cluster" ]; then
+        res=$(getClusterHealthMetric)
+    else
+        res=$(getNodeHealthMetric)
+    fi
+    echo "$res"
+}
+
+# calculate health metrics for cluster
+# 0 normal, 1 abnormal
+# 1 cluster status is green
+# 2 cluster nodes number is the same as configured
 getClusterHealthMetric() {
-    #local tmp=$(curl -s -u $)
-    :
+    local tmp=$(echo "$RAWINFO" | grep ^es_cluster_status)
+    tmp=$(echo "$tmp" | awk '{print $NF}')
+    tmp=$(printf "%.0f" "$tmp")
+    if [ "$tmp" -ne 0 ]; then
+        echo "\"$KEY_CLUSTER_HEALTH\":1"
+        return
+    fi
+
+    local realcnt=0
+    tmp=($STABLE_DATA_NODES)
+    realcnt=$((realcnt+${#tmp[@]}))
+    tmp=($STABLE_MASTER_NODES=)
+    realcnt=$((realcnt+${#tmp[@]}))
+    tmp=$(echo "$RAWINFO" | grep ^es_cluster_nodes_number)
+    tmp=$(echo "$tmp" | awk '{print $NF}')
+    tmp=$(printf "%.0f" "$tmp")
+    if [ "$realcnt" -ne "$tmp" ]; then
+        echo "\"$KEY_CLUSTER_HEALTH\":1"
+        return
+    fi
+
+    echo "\"$KEY_CLUSTER_HEALTH\":0"
+}
+
+# calculate health metrics for node
+# 0 normal, 1 abnormal
+# 1 opensearch.service is active
+# 2 9200 is listened
+getNodeHealthMetric() {
+    if ! systemctl is-active opensearch.service >/dev/null 2>&1; then
+        echo "\"$KEY_NODE_HEALTH\":1"
+        return
+    fi
+    local cnt=$(lsof -S 10 -i tcp:9200 -P | grep -i listen | wc -l)
+    if [ "$cnt" -ne 1 ]; then
+        echo "\"$KEY_NODE_HEALTH\":1"
+        return
+    fi
+    echo "\"$KEY_NODE_HEALTH\":0"
 }
 
 getClusterMetrics() {
