@@ -1,0 +1,56 @@
+{
+    "target_path": "/opt/app/bin/node/monitor.sh",
+    "cluster": {
+        "roles": [
+            "es_master_node", "es_node", "es_node_2", "es_node_3"
+        ],
+        "cmd": "sh /opt/app/bin/node/monitor.sh cluster",
+        "interval": 10,
+        "timeout": 20
+    },
+    "nodes": {
+        "roles": [
+           "master",
+           "slave"
+        ],
+        "cmd": "sh /opt/app/bin/node/monitor.sh node",
+        "interval": 10,
+        "timeout": 20
+    },
+    "items": {
+        "cluster_health": {
+            "level": 9,
+            "unit": "",
+            "zh": "集群健康状态",
+            "value_type": "int",
+            "statistics_type": "latest",
+            "min": 0,
+            "max": 0,
+            "suggest": {
+                "=0": {"level": 5, "msg": "集群健康"},
+                "=1": {"level": 5, "msg": "部分从节点不健康，不影响集群运行，但影响高可用"},
+                "=2": {"level": 5, "msg": "集群无法使用，需要联系管理员"}
+            }
+        },
+        "node_health": {
+            "level": 9,
+            "unit": "",
+            "zh": "节点健康状态",
+            "value_type": "int",
+            "statistics_type": "latest",
+            "min": 0,
+            "max": 0,
+            "suggest": {
+                "=0": {"level": 5, "msg": "节点健康"},
+                "=1": {"level": 5, "msg": "节点主从延迟过高"},
+                "=2": {"level": 5, "msg": "节点无法使用，需要联系管理员"}
+            }
+        }
+    },
+   "item_groups": {
+        "cluster": {
+            "items": ["cluster_health"],
+            "alarms": []
+        }
+    }
+}
