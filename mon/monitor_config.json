@@ -4,7 +4,7 @@
         "roles": [
             "es_master_node", "es_node", "es_node_2", "es_node_3"
         ],
-        "cmd": "sh /opt/app/bin/node/monitor.sh cluster",
+        "cmd": "/usr/bin/bash /opt/app/bin/node/monitor.sh cluster",
         "interval": 10,
         "timeout": 20
     },
@@ -13,7 +13,7 @@
            "master",
            "slave"
         ],
-        "cmd": "sh /opt/app/bin/node/monitor.sh node",
+        "cmd": "/usr/bin/bash /opt/app/bin/node/monitor.sh node",
         "interval": 10,
         "timeout": 20
     },

@@ -148,8 +148,7 @@ getNodeHealthMetric() {
         echo "\"$KEY_NODE_HEALTH\":1"
         return
     fi
-    local cnt=$(lsof -S 10 -i tcp:9200 -P | grep -i listen | wc -l)
-    if [ "$cnt" -ne 1 ]; then
+    if ! nc -z -w5 "$MY_IP" "$PORT"; then
         echo "\"$KEY_NODE_HEALTH\":1"
         return
     fi
