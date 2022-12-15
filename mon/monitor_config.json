@@ -104,15 +104,19 @@
                 "role": "es_master_node",
                 "items": [
                     "os_jvm_mem_heap_used_percent",
-                    "os_jvm_threads_number"
-                ]
+                    "os_jvm_threads_number",
+                    "node_health"
+                ],
+                "alarms": []
             },
             {
                 "role": "es_node",
                 "items": [
                     "os_jvm_mem_heap_used_percent",
-                    "os_jvm_threads_number"
-                ]
+                    "os_jvm_threads_number",
+                    "node_health"
+                ],
+                "alarms": []
             }
         ]
     }
