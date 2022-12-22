@@ -8,7 +8,7 @@
             "es_node_3"
         ],
         "cmd": "/usr/bin/bash /opt/app/bin/node/monitor.sh cluster",
-        "interval": 10,
+        "interval": 60,
         "timeout": 20
     },
     "nodes": {
@@ -19,83 +19,103 @@
             "es_node_3"
         ],
         "cmd": "/usr/bin/bash /opt/app/bin/node/monitor.sh node",
-        "interval": 10,
+        "interval": 30,
         "timeout": 20
     },
     "items": {
         "cluster_health": {
-            "level": 9,
+            "level": 5,
             "unit": "",
             "zh": "集群健康状态",
             "value_type": "int",
-            "statistics_type": "latest",
-            "min": 0,
-            "max": 0,
-            "suggest": {
-                "=0": {
-                    "level": 5,
-                    "msg": "集群健康"
-                },
-                "=1": {
-                    "level": 5,
-                    "msg": "部分从节点不健康，不影响集群运行，但影响高可用"
-                },
-                "=2": {
-                    "level": 5,
-                    "msg": "集群无法使用，需要联系管理员"
-                }
-            }
+            "statistics_type": "latest"
         },
-        "os_cluster_shards_number_unassigned": {
+        "nodes_avail_percent": {
+            "level": 5,
+            "unit": "%",
+            "zh": "集群节点可用百分比",
+            "value_type": "int",
+            "statistics_type": "latest"
+        },
+        "relocating_shards": {
+            "value_type": "int",
+            "statistics_type": "latest",
+            "zh": "正在移动的分片数",
+            "unit": "",
+            "level": 5
+        },
+        "initializing_shards": {
+            "value_type": "int",
+            "statistics_type": "latest",
+            "zh": "正在初始化的分片数",
+            "unit": "",
+            "level": 5
+        },
+        "unassigned_shards": {
             "value_type": "int",
             "statistics_type": "latest",
             "zh": "未分配的分片数",
             "unit": "",
-            "level": 9
+            "level": 5
         },
-        "node_health": {
-            "level": 9,
-            "unit": "",
-            "zh": "节点健康状态",
+        "indices_indexing_index_ops": {
+            "level": 5,
+            "unit": "op/s",
+            "zh": "节点索引 ops",
             "value_type": "int",
-            "statistics_type": "latest",
-            "min": 0,
-            "max": 0,
-            "suggest": {
-                "=0": {
-                    "level": 5,
-                    "msg": "节点健康"
-                },
-                "=1": {
-                    "level": 5,
-                    "msg": "节点主从延迟过高"
-                },
-                "=2": {
-                    "level": 5,
-                    "msg": "节点无法使用，需要联系管理员"
-                }
-            }
+            "statistics_type": "rate"
         },
-        "os_jvm_mem_heap_used_percent": {
+        "indices_search_query_ops": {
+            "level": 5,
+            "unit": "op/s",
+            "zh": "节点搜索 ops",
+            "value_type": "int",
+            "statistics_type": "rate"
+        },
+        "jvm_mem_heap_used_percent": {
             "value_type": "int",
             "statistics_type": "latest",
             "zh": "jvm heap 使用百分比",
             "unit": "%",
-            "level": 9
+            "level": 5
         },
-        "os_jvm_threads_number": {
+        "fs_total_avail_percent": {
             "value_type": "int",
             "statistics_type": "latest",
-            "zh": "jvm 线程数",
+            "zh": "磁盘可用百分比",
+            "unit": "%",
+            "level": 5
+        },
+        "os_cpu_load_average_1m": {
+            "value_type": "int",
+            "statistics_type": "latest",
+            "zh": "cpu load average(1m)",
             "unit": "",
-            "level": 9
+            "level": 5
+        },
+        "os_cpu_load_average_5m": {
+            "value_type": "int",
+            "statistics_type": "latest",
+            "zh": "cpu load average(5m)",
+            "unit": "",
+            "level": 5
+        },
+        "os_cpu_load_average_15m": {
+            "value_type": "int",
+            "statistics_type": "latest",
+            "zh": "cpu load average(15m)",
+            "unit": "",
+            "level": 5
         }
     },
     "item_groups": {
         "cluster": {
             "items": [
                 "cluster_health",
-                "os_cluster_shards_number_unassigned"
+                "nodes_avail_percent",
+                "relocating_shards",
+                "initializing_shards",
+                "unassigned_shards"
             ],
             "alarms": []
         },
@@ -103,18 +123,52 @@
             {
                 "role": "es_master_node",
                 "items": [
-                    "os_jvm_mem_heap_used_percent",
-                    "os_jvm_threads_number",
-                    "node_health"
+                    "indices_indexing_index_ops",
+                    "indices_search_query_ops",
+                    "jvm_mem_heap_used_percent",
+                    "fs_total_avail_percent",
+                    "os_cpu_load_average_1m",
+                    "os_cpu_load_average_5m",
+                    "os_cpu_load_average_15m"
                 ],
                 "alarms": []
             },
             {
                 "role": "es_node",
                 "items": [
-                    "os_jvm_mem_heap_used_percent",
-                    "os_jvm_threads_number",
-                    "node_health"
+                    "indices_indexing_index_ops",
+                    "indices_search_query_ops",
+                    "jvm_mem_heap_used_percent",
+                    "fs_total_avail_percent",
+                    "os_cpu_load_average_1m",
+                    "os_cpu_load_average_5m",
+                    "os_cpu_load_average_15m"
+                ],
+                "alarms": []
+            },
+            {
+                "role": "es_node_2",
+                "items": [
+                    "indices_indexing_index_ops",
+                    "indices_search_query_ops",
+                    "jvm_mem_heap_used_percent",
+                    "fs_total_avail_percent",
+                    "os_cpu_load_average_1m",
+                    "os_cpu_load_average_5m",
+                    "os_cpu_load_average_15m"
+                ],
+                "alarms": []
+            },
+            {
+                "role": "es_node_3",
+                "items": [
+                    "indices_indexing_index_ops",
+                    "indices_search_query_ops",
+                    "jvm_mem_heap_used_percent",
+                    "fs_total_avail_percent",
+                    "os_cpu_load_average_1m",
+                    "os_cpu_load_average_5m",
+                    "os_cpu_load_average_15m"
                 ],
                 "alarms": []
             }
