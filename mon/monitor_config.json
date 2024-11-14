@@ -63,14 +63,14 @@
             "unit": "op/s",
             "zh": "节点索引 ops",
             "value_type": "int",
-            "statistics_type": "rate"
+            "statistics_type": "delta"
         },
         "indices_search_query_ops": {
             "level": 5,
             "unit": "op/s",
             "zh": "节点搜索 ops",
             "value_type": "int",
-            "statistics_type": "rate"
+            "statistics_type": "delta"
         },
         "jvm_mem_heap_used_percent": {
             "value_type": "int",
